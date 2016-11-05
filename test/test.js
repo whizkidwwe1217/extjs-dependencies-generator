@@ -2,10 +2,10 @@ var beautify = require('js-beautify').js_beautify;
 var fs = require('fs');
 var gen = require('../index');
 
-var dir = 'test/src/**/*.js';
+var dir = 'src/**/*.js';
 
 gen.generateDependencies(dir, d => {
-    writeFile("dependencies.js", beautify(JSON.stringify(d.dependencies)));
+    writeFile("dependencies.js", beautify(JSON.stringify(d.files)));
 });
 
 

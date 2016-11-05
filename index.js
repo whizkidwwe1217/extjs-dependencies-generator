@@ -12,7 +12,7 @@ function loadClasses(dir, callback) {
         _.each(files, f => {
             let className = getClassName(f);
 
-            if(!graph.hasNode(className))
+            if (!graph.hasNode(className))
                 graph.addNode(className, f);
         });
         resolveDependencies(dir, graph, callback);
@@ -24,9 +24,9 @@ function resolveDependencies(dir, graph, callback) {
         _.each(files, f => {
             let o = getParsedObject(f);
             let d = o.dependencies;
-            if(d.length > 0) {
+            if (d.length > 0) {
                 _.each(d, c => {
-                    if(graph.hasNode(c)) {
+                    if (graph.hasNode(c)) {
                         graph.addDependency(o.className, c);
                     }
                 });
@@ -36,8 +36,8 @@ function resolveDependencies(dir, graph, callback) {
         let mapped = _.map(dependencies, d => {
             return { className: d, filename: graph.getNodeData(d) };
         });
-        if(callback) {
-            callback({ graph: graph, dependencies: mapped });
+        if (callback) {
+            callback({ graph: graph, dependencies: mapped, files: _.map(mapped, f => { return { pattern: f.filename }; }) });
         }
     });
 }
@@ -88,21 +88,31 @@ function parseTree(tree) {
         _.each(properties, prop => {
             if (prop.type === "Property" && prop.key.type === "Identifier") {
                 switch (prop.key.name) {
+                    case "extend":
+                        var s = prop.value.value.split(".", 1);
+                        var name = "";
+                        if (s.length > 0) {
+                            name = s;
+                        }
+                        if (name != "Ext") {
+                            dependencies.push(prop.value.value);
+                        }
+                        break;
                     case "requires":
-                    if (prop.value) {
-                        _.each(prop.value.elements, function (e) {
-                            if (e) {
-                                var s = e.value.split(".", 1);
-                                var name = "";
-                                if (s.length > 0) {
-                                    name = s;
+                        if (prop.value) {
+                            _.each(prop.value.elements, function (e) {
+                                if (e) {
+                                    var s = e.value.split(".", 1);
+                                    var name = "";
+                                    if (s.length > 0) {
+                                        name = s;
+                                    }
+                                    if (name != "Ext")
+                                        dependencies.push(e.value);
                                 }
-                                if (name != "Ext")
-                                     dependencies.push(e.value); 
-                            }
-                        });
-                    }
-                    break;
+                            });
+                        }
+                        break;
                 }
             }
         });
