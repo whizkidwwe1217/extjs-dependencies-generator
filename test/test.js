@@ -1,11 +1,15 @@
 var beautify = require('js-beautify').js_beautify;
 var fs = require('fs');
 var gen = require('../index');
-
+var _ = require('underscore');
 var dir = 'test/src/**/*.js';
 
 gen.generateDependencies(dir, d => {
-    writeFile("dependencies.js", beautify(JSON.stringify(d.dependencies)));
+    let files = [];
+    _.each(d.dependencies, f => {
+        files.push({ pattern: f.filename, watched: true });
+    });
+    writeFile("dependencies.js", beautify(JSON.stringify(files)));
 });
 
 
