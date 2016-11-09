@@ -39,7 +39,7 @@ function resolveDependencies(dir, graph, callback) {
             return { className: d, filename: graph.getNodeData(d) };
         });
         if (callback) {
-            callback({ graph: graph, dependencies: mapped });
+            callback({ graph: graph, dependencies: mapped, files: _.map(mapped, f => { return { pattern: f.filename }; }) });
         }
     });
 }
