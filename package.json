@@ -1,6 +1,6 @@
 {
   "name": "extjs-dependencies-generator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Generates an array of ExtJS dependencies in order.",
   "main": "index.js",
   "dependencies": {
