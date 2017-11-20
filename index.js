@@ -11,10 +11,12 @@ function loadClasses(dir, callback) {
     glob(dir, function (err, files) {
         let graph = new DepGraph();
         _.each(files, f => {
-            let className = getClassName(f);
-            if (className) {
-                if (!graph.hasNode(className))
-                    graph.addNode(className, f);
+            if (fs.lstatSync(f).isFile()) {
+                let className = getClassName(f);
+                if (className) {
+                    if (!graph.hasNode(className))
+                        graph.addNode(className, f);
+                }
             }
         });
         resolveDependencies(dir, graph, callback);
@@ -24,14 +26,16 @@ function loadClasses(dir, callback) {
 function resolveDependencies(dir, graph, callback) {
     glob(dir, function (err, files) {
         _.each(files, f => {
-            let o = getParsedObject(f);
-            let d = o.dependencies;
-            if (d.length > 0) {
-                _.each(d, c => {
-                    if (graph.hasNode(c)) {
-                        graph.addDependency(o.className, c);
-                    }
-                });
+            if (fs.lstatSync(f).isFile()) {
+                let o = getParsedObject(f);
+                let d = o.dependencies;
+                if (d.length > 0) {
+                    _.each(d, c => {
+                        if(graph.hasNode(c)) {
+                            graph.addDependency(o.className, c);
+                        }
+                    });
+                }
             }
         });
         let dependencies = graph.overallOrder(false);
@@ -51,7 +55,7 @@ function generateDependencies(dir, callback) {
 function getClassName(filename) {
     let data = fs.readFileSync(filename, 'utf-8');
     try {
-        tree = esprima.parse(data);    
+        tree = esprima.parse(data);
     } catch (error) {
         fs.appendFile('logs.log', error + endOfLine + "       -> " + filename + endOfLine, function (err) {
         if (err) throw err;
@@ -64,7 +68,7 @@ function getClassName(filename) {
 function getParsedObject(filename) {
     let data = fs.readFileSync(filename, 'utf-8');
     try {
-        tree = esprima.parse(data);    
+        tree = esprima.parse(data);
     } catch (error) {
         fs.appendFile('logs.log', error + endOfLine + "       -> " + filename + endOfLine, function (err) {
         if (err) throw err;
